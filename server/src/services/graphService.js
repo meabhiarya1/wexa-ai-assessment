@@ -45,6 +45,21 @@ function addUnique(map, node) {
   map.set(normalized.id, normalized);
 }
 
+function uniqueBy(items, getKey) {
+  const seen = new Set();
+  const unique = [];
+
+  for (const item of items) {
+    const key = getKey(item);
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    unique.push(item);
+  }
+
+  return unique;
+}
+
 export async function getStats() {
   const [[people], [teams], [skills], [projects], [relationships]] = await Promise.all([
     runRead("MATCH (p:Person) RETURN count(p) AS count"),
@@ -146,16 +161,18 @@ export async function getPersonProfile(id) {
       ...toPerson(row.p),
       team: row.t ? toTeam(row.t) : null
     },
-    skills: row.skillRows
-      .filter((item) => item.skill)
-      .map((item) => ({ ...toSkill(item.skill), level: item.level, years: item.years }))
-      .sort((a, b) => b.level - a.level || a.name.localeCompare(b.name)),
-    projects: row.projectRows
-      .filter((item) => item.project)
-      .map((item) => ({ ...toProject(item.project), role: item.role, since: item.since }))
-      .sort((a, b) => a.name.localeCompare(b.name)),
-    mentors: row.mentors.filter(Boolean).map(toPerson),
-    mentees: row.mentees.filter(Boolean).map(toPerson)
+    skills: uniqueBy(
+      row.skillRows.filter((item) => item.skill).map((item) => ({ ...toSkill(item.skill), level: item.level, years: item.years })),
+      (skill) => skill.id
+    ).sort((a, b) => b.level - a.level || a.name.localeCompare(b.name)),
+    projects: uniqueBy(
+      row.projectRows
+        .filter((item) => item.project)
+        .map((item) => ({ ...toProject(item.project), role: item.role, since: item.since })),
+      (project) => `${project.id}:${project.role}:${project.since}`
+    ).sort((a, b) => a.name.localeCompare(b.name)),
+    mentors: uniqueBy(row.mentors.filter(Boolean).map(toPerson), (person) => person.id),
+    mentees: uniqueBy(row.mentees.filter(Boolean).map(toPerson), (person) => person.id)
   };
 }
 
@@ -223,14 +240,14 @@ export async function getProjectDetail(id) {
       ...toProject(row.pr),
       team: row.t ? toTeam(row.t) : null
     },
-    requiredSkills: row.requiredSkillRows
-      .filter((item) => item.skill)
-      .map((item) => ({ ...toSkill(item.skill), priority: item.priority }))
-      .sort((a, b) => a.priority.localeCompare(b.priority) || a.name.localeCompare(b.name)),
-    members: row.memberRows
-      .filter((item) => item.person)
-      .map((item) => ({ ...toPerson(item.person), role: item.role, since: item.since }))
-      .sort((a, b) => a.name.localeCompare(b.name))
+    requiredSkills: uniqueBy(
+      row.requiredSkillRows.filter((item) => item.skill).map((item) => ({ ...toSkill(item.skill), priority: item.priority })),
+      (skill) => skill.id
+    ).sort((a, b) => a.priority.localeCompare(b.priority) || a.name.localeCompare(b.name)),
+    members: uniqueBy(
+      row.memberRows.filter((item) => item.person).map((item) => ({ ...toPerson(item.person), role: item.role, since: item.since })),
+      (person) => `${person.id}:${person.role}:${person.since}`
+    ).sort((a, b) => a.name.localeCompare(b.name))
   };
 }
 
