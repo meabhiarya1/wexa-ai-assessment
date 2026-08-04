@@ -1,19 +1,225 @@
 # TalentGraph
 
-TalentGraph is a CognoDB-backed graph application for exploring people, teams, skills, projects, mentorship, and staffing gaps inside an organization.
+TalentGraph is a React + Express application backed by CognoDB Cloud. It models an organization as a graph of people, teams, skills, projects, and mentorship relationships so non-technical users can answer questions like:
 
-This project is being built for the Wexa AI graph database assignment using React, Express, and the official Neo4j JavaScript driver for CognoDB.
+- Who has the skills this project is missing?
+- How are two people connected through teams, projects, or mentorship?
+- Who bridges otherwise separate teams?
+- What does the collaboration network look like?
 
-## Current Status
+## Live Demo And Recording
 
-Implementation is in progress. The repository starts with an assignment analysis in [`docs/assignment-analysis.md`](docs/assignment-analysis.md), then builds the application through small, reviewable commits.
+- Hosted demo: pending deployment
+- Screen recording: pending final walkthrough
 
-## Required Environment
+These two items are part of the final submission checklist and should be completed after CognoDB credentials are configured, seed data is loaded, and screenshots are captured.
 
-Copy `.env.example` to `.env` and fill in your CognoDB Cloud credentials:
+## Why A Graph Database?
+
+TalentGraph is about relationships, not isolated records. The useful questions are multi-hop traversals:
+
+- Project staffing gaps follow `Project -> REQUIRES_SKILL -> Skill <- HAS_SKILL <- Person`.
+- Collaborators follow `Person -> WORKS_ON -> Project <- WORKS_ON <- Person`.
+- Shortest-path discovery can cross `WORKS_ON`, `MEMBER_OF`, and `MENTORS` relationships without knowing the number of hops in advance.
+- Bridge detection finds people who connect different teams through shared project work.
+
+In a relational database these features require repeated joins, self-joins, exclusion queries, and recursive CTEs. In CognoDB, they are direct Cypher pattern matches.
+
+## Data Model
+
+```mermaid
+graph LR
+    Person((Person))
+    Team((Team))
+    Skill((Skill))
+    Project((Project))
+
+    Person -- "MEMBER_OF" --> Team
+    Person -- "HAS_SKILL {level, years}" --> Skill
+    Person -- "WORKS_ON {role, since}" --> Project
+    Person -- "MENTORS" --> Person
+    Project -- "REQUIRES_SKILL {priority}" --> Skill
+    Project -- "OWNED_BY" --> Team
+```
+
+| Node | Properties |
+| --- | --- |
+| `Person` | `id`, `name`, `title`, `email`, `bio` |
+| `Team` | `id`, `name`, `focus` |
+| `Skill` | `id`, `name`, `category` |
+| `Project` | `id`, `name`, `description`, `status` |
+
+| Relationship | Properties |
+| --- | --- |
+| `MEMBER_OF` | none |
+| `HAS_SKILL` | `level`, `years` |
+| `WORKS_ON` | `role`, `since` |
+| `MENTORS` | none |
+| `REQUIRES_SKILL` | `priority` |
+| `OWNED_BY` | none |
+
+## Tech Stack
+
+- React + Vite frontend.
+- Express JavaScript API.
+- CognoDB Cloud as the graph database.
+- Official `neo4j-driver` JavaScript package over `bolt+s://`.
+- Tailwind CSS and custom CSS for the UI.
+
+## Setup
+
+### 1. Create CognoDB Cloud Instance
+
+1. Go to `https://console.cognodb.com/signup`.
+2. Create a free `c0` instance.
+3. Copy the connection URI, which looks like `bolt+s://<instance-id>.databases.cognodb.cloud`.
+4. Save the generated password for the `cognodb` user. CognoDB shows it only once.
+
+### 2. Configure Environment
+
+Copy the example env file:
+
+```bash
+cp .env.example .env
+```
+
+Fill in:
 
 ```bash
 COGNODB_URI=bolt+s://your-instance-id.databases.cognodb.cloud
 COGNODB_USERNAME=cognodb
 COGNODB_PASSWORD=your-generated-password
+PORT=8080
+CLIENT_ORIGIN=http://localhost:5173
 ```
+
+Never commit real credentials. `.env` is ignored by Git.
+
+### 3. Install Dependencies
+
+```bash
+npm install
+```
+
+### 4. Seed CognoDB
+
+```bash
+npm run seed
+```
+
+The seed script:
+
+- Verifies CognoDB connectivity.
+- Clears existing graph data.
+- Creates uniqueness constraints.
+- Loads realistic teams, skills, people, projects, and relationships.
+- Uses parameterized `UNWIND` writes through the official Neo4j driver.
+
+### 5. Run Locally
+
+```bash
+npm run dev
+```
+
+- React client: `http://localhost:5173`
+- Express API: `http://localhost:8080`
+- Health endpoint: `http://localhost:8080/api/health`
+
+## Main Features
+
+- Dashboard with graph stats, global search, and bridge-person insight.
+- People directory with team and skill filters.
+- Person profile with skills, projects, mentors, mentees, and collaborators.
+- Project directory with project detail and skill-gap analysis.
+- Candidate recommendations with skill level, years, and fit score.
+- Shortest path between two people.
+- Organization graph explorer.
+- Cypher inspector panels for the most important graph queries.
+- Loading, empty, and database error states.
+
+## Main Cypher Queries
+
+### Skill Gap Analysis
+
+Find required project skills that the current project team does not cover, then recommend candidates elsewhere in the organization.
+
+```cypher
+MATCH (pr:Project {id: $id})-[req:REQUIRES_SKILL]->(s:Skill)
+OPTIONAL MATCH (pr)<-[:WORKS_ON]-(coveringPerson:Person)-[:HAS_SKILL]->(s)
+WITH pr, s, req.priority AS priority, count(coveringPerson) AS coveredCount
+WHERE coveredCount = 0
+OPTIONAL MATCH (candidate:Person)-[hs:HAS_SKILL]->(s)
+WHERE NOT (candidate)-[:WORKS_ON]->(pr)
+RETURN s, priority, candidate, hs
+ORDER BY hs.level DESC, hs.years DESC
+```
+
+### Shortest Path
+
+Find a variable-length path between two people across project, team, and mentorship relationships.
+
+```cypher
+MATCH (from:Person {id: $fromId}), (to:Person {id: $toId})
+MATCH path = shortestPath((from)-[:WORKS_ON|MEMBER_OF|MENTORS*..8]-(to))
+RETURN path
+```
+
+### Bridge People
+
+Find people who connect different teams through shared project work.
+
+```cypher
+MATCH (person:Person)-[:MEMBER_OF]->(homeTeam:Team)
+MATCH (person)-[:WORKS_ON]->(project:Project)<-[:WORKS_ON]-(peer:Person)-[:MEMBER_OF]->(peerTeam:Team)
+WHERE homeTeam.id <> peerTeam.id
+RETURN person, homeTeam, peerTeam, count(DISTINCT project) AS bridgeStrength
+ORDER BY bridgeStrength DESC
+```
+
+## Project Structure
+
+```text
+client/
+  src/
+    api.js
+    components.jsx
+    cypherSnippets.js
+    main.jsx
+    styles.css
+server/
+  scripts/
+    seed-data.js
+    seed.js
+  src/
+    db/
+    middleware/
+    routes/
+    services/
+docs/
+  assignment-analysis.md
+```
+
+## Screenshots
+
+Final screenshots should be added under `docs/screenshots/` before submission:
+
+- Dashboard.
+- People/profile workflow.
+- Project skill-gap analysis.
+- Shortest-path view.
+- Network explorer.
+
+## Submission Checklist
+
+- [x] React + Express application.
+- [x] CognoDB connection through official Neo4j JavaScript driver.
+- [x] Environment-based connection details.
+- [x] Seed script with realistic graph data.
+- [x] Parameterized Cypher query services.
+- [x] Functional UI with loading, empty, and error states.
+- [x] README with use case, graph explanation, setup, data model, and queries.
+- [ ] CognoDB instance created and seeded.
+- [ ] Screenshots added.
+- [ ] Hosted demo deployed.
+- [ ] Short screen recording created.
+- [ ] Repository URL and demo link emailed to `hr@wexa.ai` with subject `CognoDB Assignment 2 - <Your Name>`.
