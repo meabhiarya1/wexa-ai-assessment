@@ -203,13 +203,27 @@ docs/
 
 ## Screenshots
 
-Final screenshots should be added under `docs/screenshots/` before submission. Capture these exact app states:
+Screenshots are stored under `docs/screenshots/`.
 
-- `dashboard.png`: dashboard with stats loaded, search visible, and bridge people visible.
-- `people-profile.png`: people page with one person selected and their skills, projects, and collaborators visible.
-- `project-skill-gap.png`: projects page with one project selected and skill-gap recommendations visible.
-- `shortest-path.png`: connect page after selecting two people and showing the graph path plus step list.
-- `network-explorer.png`: explore page showing the draggable/zoomable graph canvas with nodes visible.
+### Dashboard
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+### People Profile
+
+![People profile](docs/screenshots/people-profile.png)
+
+### Project Skill Gap
+
+![Project skill gap](docs/screenshots/project-skill-gap.png)
+
+### Shortest Path
+
+![Shortest path](docs/screenshots/shortest-path.png)
+
+### Network Explorer
+
+![Network explorer](docs/screenshots/network-explorer.png)
 
 ## Submission Checklist
 
@@ -221,7 +235,7 @@ Final screenshots should be added under `docs/screenshots/` before submission. C
 - [x] Functional UI with loading, empty, and error states.
 - [x] README with use case, graph explanation, setup, data model, and queries.
 - [x] CognoDB instance created and seeded.
-- [ ] Screenshots added.
+- [x] Screenshots added.
 - [ ] Hosted demo deployed.
 - [ ] Short screen recording created.
 - [ ] Repository URL and demo link emailed to `hr@wexa.ai` with subject `CognoDB Assignment 2 - <Your Name>`.
