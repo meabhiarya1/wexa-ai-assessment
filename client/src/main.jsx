@@ -32,6 +32,21 @@ const navItems = [
   { id: "explore", label: "Explore", icon: Network }
 ];
 
+function uniqueBy(items = [], getKey) {
+  const seen = new Set();
+  const unique = [];
+
+  for (const item of items) {
+    const key = getKey(item);
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    unique.push(item);
+  }
+
+  return unique;
+}
+
 function useResource(path, deps = []) {
   const [state, setState] = useState({ loading: true, data: null, error: null });
 
@@ -217,6 +232,9 @@ function People() {
   const collaborators = useResource(selectedId ? `/api/people/${selectedId}/collaborators` : null, [selectedId]);
 
   const selectedProfile = selectedId ? profile.data : null;
+  const profileSkills = uniqueBy(selectedProfile?.skills, (skill) => skill.id);
+  const profileProjects = uniqueBy(selectedProfile?.projects, (project) => `${project.id}:${project.role}`);
+  const profileCollaborators = uniqueBy(collaborators.data, (person) => person.id);
 
   return (
     <section className="page-stack">
@@ -255,7 +273,7 @@ function People() {
               <p>{selectedProfile.person.bio}</p>
               <h3>Skills</h3>
               <div className="badge-row">
-                {selectedProfile.skills.map((skill) => (
+                {profileSkills.map((skill) => (
                   <Badge key={skill.id} tone="skill">
                     {skill.name} L{skill.level}
                   </Badge>
@@ -263,15 +281,15 @@ function People() {
               </div>
               <h3>Projects</h3>
               <div className="mini-list">
-                {selectedProfile.projects.map((project) => (
-                  <span key={project.id}>
+                {profileProjects.map((project) => (
+                  <span key={`${project.id}-${project.role}`}>
                     {project.name} <small>{project.role}</small>
                   </span>
                 ))}
               </div>
               <h3>Collaborators</h3>
               {collaborators.loading && <LoadingBlock label="Loading collaborators" />}
-              {collaborators.data?.map((person) => (
+              {profileCollaborators.map((person) => (
                 <PersonRow key={person.id} person={person} right={`${person.strength} shared project(s)`} />
               ))}
             </div>
@@ -289,6 +307,9 @@ function Projects() {
   const projects = useResource(`/api/projects${toQuery(filters)}`, [filters.search, filters.teamId, filters.status]);
   const detail = useResource(selectedId ? `/api/projects/${selectedId}` : null, [selectedId]);
   const gaps = useResource(selectedId ? `/api/projects/${selectedId}/gaps` : null, [selectedId]);
+  const projectRequiredSkills = uniqueBy(detail.data?.requiredSkills, (skill) => skill.id);
+  const projectMembers = uniqueBy(detail.data?.members, (person) => `${person.id}:${person.role}`);
+  const projectGaps = uniqueBy(gaps.data, (gap) => gap.skill.id);
 
   return (
     <section className="page-stack">
@@ -346,27 +367,27 @@ function Projects() {
               </div>
               <h3>Required skills</h3>
               <div className="badge-row">
-                {detail.data.requiredSkills.map((skill) => (
+                {projectRequiredSkills.map((skill) => (
                   <Badge key={skill.id} tone={skill.priority === "must-have" ? "project" : "neutral"}>
                     {skill.name}
                   </Badge>
                 ))}
               </div>
               <h3>Current team</h3>
-              {detail.data.members.map((person) => (
-                <PersonRow key={person.id} person={person} right={person.role} />
+              {projectMembers.map((person) => (
+                <PersonRow key={`${person.id}-${person.role}`} person={person} right={person.role} />
               ))}
               <h3>Skill gap analysis</h3>
               {gaps.loading && <LoadingBlock label="Running graph traversal" />}
               {gaps.error && <ErrorState error={gaps.error} onRetry={gaps.retry} />}
               {gaps.data?.length === 0 && <EmptyState title="No gaps found" description="Every required skill is covered by the current team." />}
-              {gaps.data?.map((gap) => (
+              {projectGaps.map((gap) => (
                 <div className="gap-card" key={gap.skill.id}>
                   <div>
                     <Badge tone="skill">{gap.skill.name}</Badge>
                     <Badge tone={gap.priority === "must-have" ? "project" : "neutral"}>{gap.priority}</Badge>
                   </div>
-                  {gap.candidates.map((candidate) => (
+                  {uniqueBy(gap.candidates, (candidate) => candidate.id).map((candidate) => (
                     <PersonRow
                       key={candidate.id}
                       person={candidate}
