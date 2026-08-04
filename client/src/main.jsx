@@ -37,7 +37,15 @@ function useResource(path, deps = []) {
 
   useEffect(() => {
     let active = true;
-    setState((current) => ({ ...current, loading: true, error: null }));
+
+    if (!path) {
+      setState({ loading: false, data: null, error: null });
+      return () => {
+        active = false;
+      };
+    }
+
+    setState({ loading: true, data: null, error: null });
 
     fetchJson(path)
       .then((data) => {
@@ -53,7 +61,9 @@ function useResource(path, deps = []) {
   }, deps);
 
   const retry = () => {
-    setState((current) => ({ ...current, loading: true, error: null }));
+    if (!path) return;
+
+    setState({ loading: true, data: null, error: null });
     fetchJson(path)
       .then((data) => setState({ loading: false, data, error: null }))
       .catch((error) => setState({ loading: false, data: null, error }));
@@ -203,8 +213,8 @@ function People() {
   const [filters, setFilters] = useState({ search: "", teamId: "", skillId: "" });
   const [selectedId, setSelectedId] = useState("");
   const people = useResource(`/api/people${toQuery(filters)}`, [filters.search, filters.teamId, filters.skillId]);
-  const profile = useResource(selectedId ? `/api/people/${selectedId}` : "/api/people", [selectedId]);
-  const collaborators = useResource(selectedId ? `/api/people/${selectedId}/collaborators` : "/api/people", [selectedId]);
+  const profile = useResource(selectedId ? `/api/people/${selectedId}` : null, [selectedId]);
+  const collaborators = useResource(selectedId ? `/api/people/${selectedId}/collaborators` : null, [selectedId]);
 
   const selectedProfile = selectedId ? profile.data : null;
 
@@ -277,8 +287,8 @@ function Projects() {
   const [filters, setFilters] = useState({ search: "", teamId: "", status: "" });
   const [selectedId, setSelectedId] = useState("");
   const projects = useResource(`/api/projects${toQuery(filters)}`, [filters.search, filters.teamId, filters.status]);
-  const detail = useResource(selectedId ? `/api/projects/${selectedId}` : "/api/projects", [selectedId]);
-  const gaps = useResource(selectedId ? `/api/projects/${selectedId}/gaps` : "/api/projects", [selectedId]);
+  const detail = useResource(selectedId ? `/api/projects/${selectedId}` : null, [selectedId]);
+  const gaps = useResource(selectedId ? `/api/projects/${selectedId}/gaps` : null, [selectedId]);
 
   return (
     <section className="page-stack">
@@ -378,7 +388,7 @@ function Connect() {
   const people = useResource("/api/people", []);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const path = useResource(from && to ? `/api/path${toQuery({ from, to })}` : "/api/people", [from, to]);
+  const path = useResource(from && to ? `/api/path${toQuery({ from, to })}` : null, [from, to]);
 
   const nodeLabels = useMemo(() => {
     const labels = new Map();
