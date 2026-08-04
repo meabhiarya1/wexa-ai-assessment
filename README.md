@@ -133,7 +133,7 @@ npm run dev
 - Project directory with project detail and skill-gap analysis.
 - Candidate recommendations with skill level, years, and fit score.
 - Shortest path between two people.
-- Organization graph explorer.
+- Draggable, zoomable organization graph explorer.
 - Cypher inspector panels for the most important graph queries.
 - Loading, empty, and database error states.
 
