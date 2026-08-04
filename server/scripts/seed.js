@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "../src/loadEnv.js";
 import { checkConnectivity, closeDriver, runRead, runWrite } from "../src/db/neo4j.js";
 import { getSeedGraph } from "./seed-data.js";
 
