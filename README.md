@@ -14,6 +14,8 @@ TalentGraph is a React + Express application backed by CognoDB Cloud. It models 
 
 These two items are part of the final submission checklist and should be completed after CognoDB credentials are configured, seed data is loaded, and screenshots are captured.
 
+Current database status: CognoDB is configured and seeded with 56 nodes and 134 relationships.
+
 ## Why A Graph Database?
 
 TalentGraph is about relationships, not isolated records. The useful questions are multi-hop traversals:
@@ -201,13 +203,13 @@ docs/
 
 ## Screenshots
 
-Final screenshots should be added under `docs/screenshots/` before submission:
+Final screenshots should be added under `docs/screenshots/` before submission. Capture these exact app states:
 
-- Dashboard.
-- People/profile workflow.
-- Project skill-gap analysis.
-- Shortest-path view.
-- Network explorer.
+- `dashboard.png`: dashboard with stats loaded, search visible, and bridge people visible.
+- `people-profile.png`: people page with one person selected and their skills, projects, and collaborators visible.
+- `project-skill-gap.png`: projects page with one project selected and skill-gap recommendations visible.
+- `shortest-path.png`: connect page after selecting two people and showing the graph path plus step list.
+- `network-explorer.png`: explore page showing the draggable/zoomable graph canvas with nodes visible.
 
 ## Submission Checklist
 
@@ -218,7 +220,7 @@ Final screenshots should be added under `docs/screenshots/` before submission:
 - [x] Parameterized Cypher query services.
 - [x] Functional UI with loading, empty, and error states.
 - [x] README with use case, graph explanation, setup, data model, and queries.
-- [ ] CognoDB instance created and seeded.
+- [x] CognoDB instance created and seeded.
 - [ ] Screenshots added.
 - [ ] Hosted demo deployed.
 - [ ] Short screen recording created.
