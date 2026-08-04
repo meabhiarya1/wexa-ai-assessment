@@ -67,14 +67,14 @@ Relationships:
 ## Tech Stack
 
 - React with Vite for the frontend.
-- Express with TypeScript for the backend API.
+- Express with plain JavaScript for the backend API.
 - Official `neo4j-driver` for CognoDB.
 - Tailwind CSS for UI.
 - `react-force-graph-2d` or an equivalent graph visualization library.
 
 ## Build Roadmap
 
-1. Scaffold React, Express, TypeScript, Tailwind, and shared types.
+1. Scaffold React, Express, JavaScript, Tailwind, and shared domain helpers.
 2. Add CognoDB connection layer with env validation and health checks.
 3. Add seed data and idempotent seed script.
 4. Add parameterized Cypher query services.
