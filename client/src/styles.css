@@ -33,6 +33,32 @@ button {
   min-height: 100vh;
 }
 
+.crash-screen {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  background: #eef3f8;
+  padding: 24px;
+}
+
+.crash-screen > div {
+  width: min(620px, 100%);
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+}
+
+.crash-screen button {
+  border: 0;
+  border-radius: 7px;
+  background: #111827;
+  color: #ffffff;
+  padding: 10px 14px;
+  font-weight: 800;
+}
+
 .sidebar {
   position: sticky;
   top: 0;

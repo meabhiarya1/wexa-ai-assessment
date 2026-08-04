@@ -33,10 +33,11 @@ const navItems = [
 ];
 
 function uniqueBy(items = [], getKey) {
+  const list = items || [];
   const seen = new Set();
   const unique = [];
 
-  for (const item of items) {
+  for (const item of list) {
     const key = getKey(item);
     if (seen.has(key)) continue;
 
@@ -45,6 +46,34 @@ function uniqueBy(items = [], getKey) {
   }
 
   return unique;
+}
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <main className="crash-screen">
+          <div>
+            <p className="eyebrow">UI error</p>
+            <h1>Something in this view crashed.</h1>
+            <p>{this.state.error.message}</p>
+            <button onClick={() => window.location.reload()}>Reload app</button>
+          </div>
+        </main>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
 function useResource(path, deps = []) {
@@ -579,6 +608,8 @@ function Header({ eyebrow, title }) {
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>
 );
