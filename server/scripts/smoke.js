@@ -16,25 +16,32 @@ const checks = [
   { name: "bridges", path: "/api/insights/bridges?limit=3", status: 200, assert: (body) => Array.isArray(body) && body.length <= 3 },
   { name: "shortest path", path: "/api/path?from=person-aanya&to=person-camila", status: 200, assert: (body) => body.found === true },
   { name: "graph", path: "/api/graph", status: 200, assert: (body) => body.nodes?.length > 0 && body.links?.length > 0 },
-  { name: "missing path params", path: "/api/path", status: 400, assert: (body) => body.code === "BAD_REQUEST" },
-  { name: "missing person", path: "/api/people/person-not-real", status: 404, assert: (body) => body.code === "NOT_FOUND" },
-  { name: "invalid route", path: "/api/not-real", status: 404, assert: (body) => body.code === "ROUTE_NOT_FOUND" }
+  { name: "missing path params", path: "/api/path", status: 400, assert: (body) => body.error?.code === "BAD_REQUEST" },
+  { name: "missing person", path: "/api/people/person-not-real", status: 404, assert: (body) => body.error?.code === "NOT_FOUND" },
+  { name: "invalid route", path: "/api/not-real", status: 404, assert: (body) => body.error?.code === "ROUTE_NOT_FOUND" }
 ];
 
 let failed = 0;
 
 for (const check of checks) {
   const url = `${baseUrl}${check.path}`;
+
   try {
     const response = await fetch(url);
-    const body = await response.json();
+    const payload = await response.json();
+    const body = response.ok ? payload.data : payload;
     const statusOk = response.status === check.status;
+    const envelopeOk =
+      payload.statusCode === response.status &&
+      payload.success === response.ok &&
+      Object.hasOwn(payload, "data") &&
+      typeof payload.message === "string";
     const bodyOk = check.assert ? check.assert(body) : true;
 
-    if (!statusOk || !bodyOk) {
+    if (!statusOk || !envelopeOk || !bodyOk) {
       failed += 1;
       console.error(`FAIL ${check.name}: expected ${check.status}, got ${response.status}`);
-      console.error(JSON.stringify(body));
+      console.error(JSON.stringify(payload));
       continue;
     }
 

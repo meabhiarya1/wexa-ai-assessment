@@ -1,21 +1,13 @@
-export class HttpError extends Error {
-  constructor(status, code, message, details = undefined) {
-    super(message);
-    this.name = "HttpError";
-    this.status = status;
-    this.code = code;
-    this.details = details;
-  }
-}
+import { ApiError } from "./apiError.js";
 
 export function badRequest(message, details) {
-  return new HttpError(400, "BAD_REQUEST", message, details);
+  return new ApiError(400, message, "BAD_REQUEST", details);
 }
 
 export function notFound(message) {
-  return new HttpError(404, "NOT_FOUND", message);
+  return new ApiError(404, message, "NOT_FOUND");
 }
 
 export function tooManyRequests(message = "Too many requests. Please try again later.") {
-  return new HttpError(429, "RATE_LIMITED", message);
+  return new ApiError(429, message, "RATE_LIMITED");
 }

@@ -29,11 +29,13 @@ export function EmptyState({ title, description }) {
 }
 
 export function ErrorState({ error, onRetry }) {
+  const missingVars = error?.details?.missingVars || error?.details?.error?.details?.missingVars;
+
   return (
     <div className="state state-error">
       <AlertTriangle size={20} aria-hidden="true" />
       <strong>{error?.message || "Something went wrong."}</strong>
-      {error?.details?.missingVars && <span>Missing: {error.details.missingVars.join(", ")}</span>}
+      {missingVars && <span>Missing: {missingVars.join(", ")}</span>}
       {onRetry && <button onClick={onRetry}>Retry</button>}
     </div>
   );

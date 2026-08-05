@@ -1,14 +1,17 @@
 import { getProjectDetail, getProjectSkillGaps, listProjects } from "../services/projectService.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 import { optionalString } from "../utils/requestParams.js";
 import { notFound } from "../utils/httpErrors.js";
 
 export async function getProjects(req, res) {
-  res.json(
+  sendSuccess(
+    res,
     await listProjects({
       search: optionalString(req.query.search),
       teamId: optionalString(req.query.teamId),
       status: optionalString(req.query.status)
-    })
+    }),
+    "Projects fetched successfully."
   );
 }
 
@@ -19,9 +22,9 @@ export async function getProject(req, res) {
     throw notFound("Project not found");
   }
 
-  return res.json(project);
+  return sendSuccess(res, project, "Project detail fetched successfully.");
 }
 
 export async function getSkillGaps(req, res) {
-  res.json(await getProjectSkillGaps(req.params.id));
+  sendSuccess(res, await getProjectSkillGaps(req.params.id), "Project skill gaps fetched successfully.");
 }

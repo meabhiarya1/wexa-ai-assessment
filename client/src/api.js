@@ -12,7 +12,11 @@ export async function fetchJson(path) {
   const payload = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new ApiError(payload.error || "Request failed.", response.status, payload);
+    throw new ApiError(payload.message || payload.error || "Request failed.", response.status, payload);
+  }
+
+  if (payload && payload.success === true && Object.hasOwn(payload, "data")) {
+    return payload.data;
   }
 
   return payload;

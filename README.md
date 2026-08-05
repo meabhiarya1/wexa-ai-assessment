@@ -143,6 +143,12 @@ To test a deployed API or a different local port:
 API_BASE_URL=https://your-api-url npm run smoke
 ```
 
+Run the full API integration test suite:
+
+```bash
+npm test
+```
+
 ## Main Features
 
 - Dashboard with graph stats, global search, and bridge-person insight.
@@ -155,6 +161,7 @@ API_BASE_URL=https://your-api-url npm run smoke
 - Cypher inspector panels for the most important graph queries.
 - Loading, empty, and database error states.
 - Backend request IDs, rate limiting, validation, read caching, structured errors, readiness checks, and graceful shutdown.
+- Consistent `ApiResponse` and `ApiError` response structure across success and failure flows.
 - API smoke test covering success and error paths.
 
 ## Main Cypher Queries
@@ -220,6 +227,18 @@ server/
     routes/
     services/
     utils/
+  tests/
+    catalog.test.js
+    errors.test.js
+    graph.test.js
+    health.test.js
+    insights.test.js
+    path.test.js
+    people.test.js
+    projects.test.js
+    search.test.js
+    stats.test.js
+    helpers/
 docs/
   assignment-analysis.md
   screenshots/
@@ -259,6 +278,7 @@ Screenshots are stored under `docs/screenshots/`.
 - [x] Parameterized Cypher repository queries.
 - [x] Production-style API hardening with request IDs, rate limiting, validation, caching, structured errors, health/readiness endpoints, and graceful shutdown.
 - [x] Automated API smoke test.
+- [x] API integration tests covering happy paths, validation errors, missing resources, unsupported methods, malformed JSON, caching, and rate limiting.
 - [x] Functional UI with loading, empty, and error states.
 - [x] README with use case, graph explanation, setup, data model, and queries.
 - [x] CognoDB instance created and seeded.
