@@ -26,7 +26,7 @@ describe("ExplorePage", () => {
 
     render(<ExplorePage />);
 
-    expect(screen.getByText("drag nodes")).toBeInTheDocument();
+    expect(screen.getByText("Drag nodes")).toBeInTheDocument();
     expect(screen.getAllByText(/relationships/i).length).toBeGreaterThan(0);
     expect(screen.getByText("relationships")).toBeInTheDocument();
 

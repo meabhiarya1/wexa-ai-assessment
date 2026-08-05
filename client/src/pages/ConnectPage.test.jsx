@@ -26,7 +26,7 @@ describe("ConnectPage", () => {
     await user.selectOptions(selects[0], "person-aanya");
     await user.selectOptions(selects[1], "person-ben");
 
-    expect(screen.getByText("drag nodes")).toBeInTheDocument();
+    expect(screen.getByText("Drag nodes")).toBeInTheDocument();
     expect(screen.getByText("2 relationships")).toBeInTheDocument();
     expect(screen.getByText("works on")).toBeInTheDocument();
     expect(screen.getByText("Cypher powering shortest path")).toBeInTheDocument();
