@@ -1,14 +1,7 @@
 import "../src/loadEnv.js";
 import { checkConnectivity, closeDriver, runRead, runWrite } from "../src/db/neo4j.js";
 import { getSeedGraph } from "./seed-data.js";
-
-const labels = ["Person", "Team", "Skill", "Project"];
-
-async function createConstraints() {
-  for (const label of labels) {
-    await runWrite(`CREATE CONSTRAINT IF NOT EXISTS FOR (n:${label}) REQUIRE n.id IS UNIQUE`);
-  }
-}
+import { migrations } from "../migrations/index.js";
 
 async function main() {
   console.log("Checking CognoDB connectivity...");
@@ -25,8 +18,10 @@ async function main() {
   console.log("Wiping existing graph data...");
   await runWrite("MATCH (n) DETACH DELETE n");
 
-  console.log("Creating uniqueness constraints...");
-  await createConstraints();
+  console.log("Applying graph schema migrations...");
+  for (const migration of migrations) {
+    await migration.up({ runWrite });
+  }
 
   console.log(`Loading ${graph.teams.length} teams...`);
   await runWrite("UNWIND $rows AS row CREATE (t:Team) SET t = row", { rows: graph.teams });

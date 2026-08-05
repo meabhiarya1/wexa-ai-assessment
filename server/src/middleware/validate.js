@@ -1,13 +1,5 @@
 import { badRequest } from "../utils/httpErrors.js";
-
-const idPatterns = {
-  personId: /^person-[a-z0-9-]+$/,
-  projectId: /^project-[a-z0-9-]+$/,
-  teamId: /^team-[a-z0-9-]+$/,
-  skillId: /^skill-[a-z0-9-]+$/
-};
-
-const projectStatuses = new Set(["active", "planning", "completed"]);
+import { ENTITY_ID_PATTERNS, PROJECT_STATUSES, isEntityId, isProjectStatus } from "../domain/graphModel.js";
 
 export function validatePeopleQuery(req, _res, next) {
   validateOptionalText(req.query.search, "search", { max: 80 });
@@ -20,10 +12,10 @@ export function validateProjectsQuery(req, _res, next) {
   validateOptionalText(req.query.search, "search", { max: 80 });
   validateOptionalId(req.query.teamId, "teamId");
 
-  if (req.query.status && !projectStatuses.has(String(req.query.status))) {
+  if (req.query.status && !isProjectStatus(String(req.query.status))) {
     throw badRequest("Invalid project status.", {
       field: "status",
-      allowed: [...projectStatuses]
+      allowed: PROJECT_STATUSES
     });
   }
 
@@ -75,8 +67,8 @@ function validateOptionalText(value, field, { max }) {
 function validateOptionalId(value, field) {
   if (value === undefined || value === null || value === "") return;
 
-  const pattern = idPatterns[field];
-  if (pattern && !pattern.test(String(value))) {
+  const pattern = ENTITY_ID_PATTERNS[field];
+  if (pattern && !isEntityId(value, field)) {
     throw badRequest(`Invalid '${field}' format.`, { field });
   }
 }
@@ -86,7 +78,7 @@ function validateRequiredId(value, field, type) {
     throw badRequest(`'${field}' is required.`, { field });
   }
 
-  if (!idPatterns[type].test(String(value))) {
+  if (!isEntityId(value, type)) {
     throw badRequest(`Invalid '${field}' format.`, { field });
   }
 }

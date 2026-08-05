@@ -103,7 +103,20 @@ Never commit real credentials. `.env` is ignored by Git.
 npm install
 ```
 
-### 4. Seed CognoDB
+### 4. Run Migrations
+
+```bash
+npm run migrate
+```
+
+The migration script:
+
+- Verifies CognoDB connectivity.
+- Creates node id uniqueness constraints.
+- Creates read-oriented indexes for common search/filter fields.
+- Uses idempotent Cypher so it is safe to run more than once.
+
+### 5. Seed CognoDB
 
 ```bash
 npm run seed
@@ -113,11 +126,11 @@ The seed script:
 
 - Verifies CognoDB connectivity.
 - Clears existing graph data.
-- Creates uniqueness constraints.
+- Applies graph schema migrations.
 - Loads realistic teams, skills, people, projects, and relationships.
 - Uses parameterized `UNWIND` writes through the official Neo4j driver.
 
-### 5. Run Locally
+### 6. Run Locally
 
 ```bash
 npm run dev
@@ -129,7 +142,7 @@ npm run dev
 - Liveness endpoint: `http://localhost:8080/api/health/live`
 - Readiness endpoint: `http://localhost:8080/api/ready`
 
-### 6. Verify API
+### 7. Verify API
 
 With the API running, execute the smoke test:
 
@@ -162,6 +175,8 @@ npm test
 - Loading, empty, and database error states.
 - Backend request IDs, rate limiting, validation, read caching, structured errors, readiness checks, and graceful shutdown.
 - Consistent `ApiResponse` and `ApiError` response structure across success and failure flows.
+- Graph domain model constants for labels, relationship types, project statuses, and entity id validation.
+- Versioned CognoDB migrations for constraints and indexes.
 - API smoke test covering success and error paths.
 
 ## Main Cypher Queries
@@ -214,13 +229,18 @@ client/
     main.jsx
     styles.css
 server/
+  migrations/
+    001_create_graph_constraints_and_indexes.js
+    index.js
   scripts/
+    migrate.js
     seed-data.js
     seed.js
     smoke.js
   src/
     controllers/
     db/
+    domain/
     mappers/
     middleware/
     repositories/
@@ -275,6 +295,8 @@ Screenshots are stored under `docs/screenshots/`.
 - [x] Environment-based connection details.
 - [x] Seed script with realistic graph data.
 - [x] Layered API structure with routes, controllers, services, repositories, mappers, and shared utilities.
+- [x] Graph domain model constants instead of fake ORM models.
+- [x] Versioned CognoDB migration runner for constraints and indexes.
 - [x] Parameterized Cypher repository queries.
 - [x] Production-style API hardening with request IDs, rate limiting, validation, caching, structured errors, health/readiness endpoints, and graceful shutdown.
 - [x] Automated API smoke test.
