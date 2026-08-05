@@ -233,14 +233,41 @@ client/
   public/
     _redirects
   src/
+    App.jsx
     api.js
     components.jsx
+    components/
+      ErrorBoundary.jsx
+      PageHeader.jsx
+      PeopleFilterBar.jsx
+    constants/
     context/
+      AppDataContext.jsx
     cypherSnippets.js
     hooks/
+      useDebouncedValue.js
+      useResource.js
     lib/
+      apiClient.js
+    layout/
+      AppShell.jsx
     main.jsx
+    pages/
+      ConnectPage.jsx
+      DashboardPage.jsx
+      ExplorePage.jsx
+      PeoplePage.jsx
+      ProjectsPage.jsx
+    router/
+      navItems.jsx
+      routes.jsx
+      useBrowserRoute.js
     styles.css
+    test/
+      fixtures.js
+      mockResource.js
+      setup.js
+    utils/
 server/
   migrations/
     001_create_graph_constraints_and_indexes.js
@@ -276,6 +303,23 @@ docs/
   assignment-analysis.md
   screenshots/
 ```
+
+## Frontend Architecture
+
+The frontend is intentionally split by responsibility instead of keeping all route logic in `main.jsx`.
+
+- `main.jsx` only mounts React.
+- `App.jsx` wires global providers and the UI error boundary.
+- `layout/AppShell.jsx` owns the sidebar, database banner, and active page outlet.
+- `router/` owns navigation metadata, route normalization, and browser-history navigation.
+- `pages/` contains feature screens for Dashboard, People, Projects, Connect, and Explore.
+- `context/` stores shared app data used across pages, including health, teams, and skills.
+- `hooks/` keeps reusable async and debounce behavior.
+- `lib/apiClient.js` centralizes Axios configuration and frontend API error normalization.
+- `components/` and `components.jsx` contain shared UI building blocks.
+- `test/` contains frontend test setup, fixtures, and API hook mocks used by page tests.
+
+This keeps routing, page state, API concerns, and reusable UI separated while still staying lightweight for the assignment scope.
 
 ## Screenshots
 
