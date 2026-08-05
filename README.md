@@ -424,6 +424,3 @@ Screenshots are stored under `docs/screenshots/`.
 - [x] README with use case, graph explanation, setup, data model, and queries.
 - [x] CognoDB instance created and seeded.
 - [x] Screenshots added.
-- [x] Hosted demo deployed.
-- [ ] Short screen recording created.
-- [ ] Repository URL and demo link emailed to `hr@wexa.ai` with subject `CognoDB Assignment 2 - <Your Name>`.
