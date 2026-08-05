@@ -3,7 +3,6 @@ import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 
 const browserGlobals = {
-  AbortController: "readonly",
   console: "readonly",
   document: "readonly",
   fetch: "readonly",

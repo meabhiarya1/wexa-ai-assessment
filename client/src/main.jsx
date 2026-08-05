@@ -641,11 +641,9 @@ function Header({ eyebrow, title }) {
 }
 
 createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <AppDataProvider>
-        <AppShell />
-      </AppDataProvider>
-    </ErrorBoundary>
-  </React.StrictMode>
+  <ErrorBoundary>
+    <AppDataProvider>
+      <AppShell />
+    </AppDataProvider>
+  </ErrorBoundary>
 );
