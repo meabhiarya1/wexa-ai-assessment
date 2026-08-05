@@ -9,10 +9,11 @@ TalentGraph is a React + Express application backed by CognoDB Cloud. It models 
 
 ## Live Demo And Recording
 
-- Hosted demo: pending deployment
+- Hosted demo: `https://talentgraph-assessment.netlify.app`
+- API server: `https://talentgraph-api-o6ri.onrender.com`
 - Screen recording: pending final walkthrough
 
-These two items are part of the final submission checklist and should be completed after CognoDB credentials are configured, seed data is loaded, and screenshots are captured.
+The screen recording is part of the final submission checklist and should be completed after one final deployed walkthrough.
 
 Current database status: CognoDB is configured and seeded with 56 nodes and 134 relationships.
 
@@ -196,7 +197,7 @@ Publish directory: dist
 Set this Netlify environment variable:
 
 ```text
-VITE_API_BASE_URL=https://your-render-service.onrender.com
+VITE_API_BASE_URL=https://talentgraph-api-o6ri.onrender.com
 ```
 
 Render can deploy the backend from `main` with:
@@ -216,6 +217,12 @@ COGNODB_URI
 COGNODB_USERNAME
 COGNODB_PASSWORD
 CLIENT_ORIGIN=https://your-netlify-site.netlify.app
+```
+
+For this deployment:
+
+```text
+CLIENT_ORIGIN=https://talentgraph-assessment.netlify.app
 ```
 
 After CI is passing, configure Render auto-deploy to wait for CI checks before deploying from `main`.

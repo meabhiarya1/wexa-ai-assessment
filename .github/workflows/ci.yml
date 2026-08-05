@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: test
-      CLIENT_ORIGIN: http://localhost:5173
+      CLIENT_ORIGIN: https://talentgraph-assessment.netlify.app
       COGNODB_URI: ${{ secrets.COGNODB_URI }}
       COGNODB_USERNAME: ${{ secrets.COGNODB_USERNAME }}
       COGNODB_PASSWORD: ${{ secrets.COGNODB_PASSWORD }}
