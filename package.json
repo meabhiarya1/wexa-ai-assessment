@@ -11,7 +11,9 @@
     "migrate": "npm run migrate --workspace server",
     "seed": "npm run seed --workspace server",
     "smoke": "npm run smoke --workspace server",
-    "test": "npm run test --workspace server",
+    "test": "npm run test --workspaces --if-present",
+    "test:client": "npm run test --workspace client",
+    "test:server": "npm run test --workspace server",
     "lint": "npm run lint --workspaces --if-present"
   },
   "workspaces": [

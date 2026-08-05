@@ -8,6 +8,7 @@ const browserGlobals = {
   fetch: "readonly",
   HTMLCanvasElement: "readonly",
   localStorage: "readonly",
+  PopStateEvent: "readonly",
   ResizeObserver: "readonly",
   URLSearchParams: "readonly",
   setInterval: "readonly",
