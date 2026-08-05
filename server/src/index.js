@@ -36,5 +36,5 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 app.listen(port, () => {
-  console.log(`TalentGraph API listening on http://localhost:${port}`);
+  console.log(`TalentGraph API listening on ${clientOrigin} on port ${port}`);
 });
