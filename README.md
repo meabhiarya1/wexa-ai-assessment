@@ -166,6 +166,60 @@ Run the full API integration test suite:
 npm test
 ```
 
+## CI And Deployment
+
+GitHub Actions runs on every push and pull request targeting `main`.
+
+The workflow verifies:
+
+- Workspace linting.
+- Frontend route, hook, and component tests.
+- Frontend production build.
+- Backend API integration tests.
+
+Add these repository secrets before relying on CI as a deployment gate:
+
+```text
+COGNODB_URI
+COGNODB_USERNAME
+COGNODB_PASSWORD
+```
+
+Netlify can deploy the frontend from `main` using the included `netlify.toml`:
+
+```text
+Base directory: client
+Build command: npm run build
+Publish directory: dist
+```
+
+Set this Netlify environment variable:
+
+```text
+VITE_API_BASE_URL=https://your-render-service.onrender.com
+```
+
+Render can deploy the backend from `main` with:
+
+```text
+Root directory: server
+Build command: npm install
+Start command: npm start
+Health check path: /api/health/live
+```
+
+Set these Render environment variables:
+
+```text
+NODE_ENV=production
+COGNODB_URI
+COGNODB_USERNAME
+COGNODB_PASSWORD
+CLIENT_ORIGIN=https://your-netlify-site.netlify.app
+```
+
+After CI is passing, configure Render auto-deploy to wait for CI checks before deploying from `main`.
+
 ## Main Features
 
 - Dashboard with graph stats, global search, and bridge-person insight.
