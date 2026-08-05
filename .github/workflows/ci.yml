@@ -44,6 +44,24 @@ jobs:
       - name: Build backend
         run: npm run build --workspace server
 
+  deploy-backend:
+    name: Trigger Render Backend Deploy
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify Render deploy hook secret
+        run: |
+          node -e "if (!process.env.RENDER_DEPLOY_HOOK_URL) { console.error('Missing GitHub Actions secret: RENDER_DEPLOY_HOOK_URL'); process.exit(1); }"
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+
+      - name: Trigger Render deploy hook
+        run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+
   backend-integration:
     name: Backend CognoDB Integration
     if: github.event_name == 'workflow_dispatch'
