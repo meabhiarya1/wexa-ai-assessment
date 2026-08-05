@@ -1,16 +1,9 @@
 import { Router } from "express";
-import { checkConnectivity } from "../db/neo4j.js";
+import { getHealth } from "../controllers/healthController.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
-router.get("/", async (_req, res) => {
-  const database = await checkConnectivity();
-
-  res.status(database.ok ? 200 : 503).json({
-    ok: database.ok,
-    service: "talentgraph-api",
-    database
-  });
-});
+router.get("/", asyncHandler(getHealth));
 
 export default router;

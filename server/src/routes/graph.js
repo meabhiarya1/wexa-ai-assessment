@@ -1,14 +1,9 @@
 import { Router } from "express";
-import { getNetworkGraph } from "../services/graphService.js";
+import { getGraph } from "../controllers/graphController.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
-router.get("/", async (req, res, next) => {
-  try {
-    res.json(await getNetworkGraph({ teamId: req.query.teamId || null }));
-  } catch (error) {
-    next(error);
-  }
-});
+router.get("/", asyncHandler(getGraph));
 
 export default router;

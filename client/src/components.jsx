@@ -9,15 +9,6 @@ const nodeColors = {
   Project: "#e11d48"
 };
 
-const relationshipLabels = {
-  MEMBER_OF: "member of",
-  HAS_SKILL: "has skill",
-  WORKS_ON: "works on",
-  MENTORS: "mentors",
-  REQUIRES_SKILL: "requires",
-  OWNED_BY: "owned by"
-};
-
 export function LoadingBlock({ label = "Loading" }) {
   return (
     <div className="state state-loading">

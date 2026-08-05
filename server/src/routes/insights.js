@@ -1,15 +1,9 @@
 import { Router } from "express";
-import { findBridgePeople } from "../services/graphService.js";
+import { getBridgePeople } from "../controllers/insightsController.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
-router.get("/bridges", async (req, res, next) => {
-  try {
-    const limit = Number(req.query.limit || 10);
-    res.json(await findBridgePeople(limit));
-  } catch (error) {
-    next(error);
-  }
-});
+router.get("/bridges", asyncHandler(getBridgePeople));
 
 export default router;

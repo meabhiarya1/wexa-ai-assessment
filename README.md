@@ -193,12 +193,17 @@ server/
     seed-data.js
     seed.js
   src/
+    controllers/
     db/
+    mappers/
     middleware/
+    repositories/
     routes/
     services/
+    utils/
 docs/
   assignment-analysis.md
+  screenshots/
 ```
 
 ## Screenshots
@@ -231,7 +236,8 @@ Screenshots are stored under `docs/screenshots/`.
 - [x] CognoDB connection through official Neo4j JavaScript driver.
 - [x] Environment-based connection details.
 - [x] Seed script with realistic graph data.
-- [x] Parameterized Cypher query services.
+- [x] Layered API structure with routes, controllers, services, repositories, mappers, and shared utilities.
+- [x] Parameterized Cypher repository queries.
 - [x] Functional UI with loading, empty, and error states.
 - [x] README with use case, graph explanation, setup, data model, and queries.
 - [x] CognoDB instance created and seeded.

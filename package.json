@@ -2,6 +2,7 @@
   "name": "talentgraph",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "A CognoDB-backed organizational skill and collaboration graph.",
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace server\" \"npm run dev --workspace client\"",
