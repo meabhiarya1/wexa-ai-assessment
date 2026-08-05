@@ -11,9 +11,9 @@ TalentGraph is a React + Express application backed by CognoDB Cloud. It models 
 
 - Hosted demo: `https://talentgraph-assessment.netlify.app`
 - API server: `https://talentgraph-api-o6ri.onrender.com`
-- Screen recording: pending final walkthrough
+- Screen recording: `https://www.loom.com/share/021f9dfbcb0f4bfebdf6200f0d721d24`
 
-The screen recording is part of the final submission checklist and should be completed after one final deployed walkthrough.
+The recording walks through the deployed application, graph-backed workflows, and key implementation details.
 
 Current database status: CognoDB is configured and seeded with 56 nodes and 134 relationships.
 
@@ -424,3 +424,6 @@ Screenshots are stored under `docs/screenshots/`.
 - [x] README with use case, graph explanation, setup, data model, and queries.
 - [x] CognoDB instance created and seeded.
 - [x] Screenshots added.
+- [x] Hosted demo deployed.
+- [x] Short screen recording created.
+- [ ] Repository URL and demo link emailed to `hr@wexa.ai` with subject `CognoDB Assignment 2 - Abhishek Kumar`.
