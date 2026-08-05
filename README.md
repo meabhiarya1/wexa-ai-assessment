@@ -126,6 +126,22 @@ npm run dev
 - React client: `http://localhost:5173`
 - Express API: `http://localhost:8080`
 - Health endpoint: `http://localhost:8080/api/health`
+- Liveness endpoint: `http://localhost:8080/api/health/live`
+- Readiness endpoint: `http://localhost:8080/api/ready`
+
+### 6. Verify API
+
+With the API running, execute the smoke test:
+
+```bash
+npm run smoke
+```
+
+To test a deployed API or a different local port:
+
+```bash
+API_BASE_URL=https://your-api-url npm run smoke
+```
 
 ## Main Features
 
@@ -138,6 +154,8 @@ npm run dev
 - Draggable, zoomable organization graph explorer.
 - Cypher inspector panels for the most important graph queries.
 - Loading, empty, and database error states.
+- Backend request IDs, rate limiting, validation, read caching, structured errors, readiness checks, and graceful shutdown.
+- API smoke test covering success and error paths.
 
 ## Main Cypher Queries
 
@@ -192,6 +210,7 @@ server/
   scripts/
     seed-data.js
     seed.js
+    smoke.js
   src/
     controllers/
     db/
@@ -238,6 +257,8 @@ Screenshots are stored under `docs/screenshots/`.
 - [x] Seed script with realistic graph data.
 - [x] Layered API structure with routes, controllers, services, repositories, mappers, and shared utilities.
 - [x] Parameterized Cypher repository queries.
+- [x] Production-style API hardening with request IDs, rate limiting, validation, caching, structured errors, health/readiness endpoints, and graceful shutdown.
+- [x] Automated API smoke test.
 - [x] Functional UI with loading, empty, and error states.
 - [x] README with use case, graph explanation, setup, data model, and queries.
 - [x] CognoDB instance created and seeded.

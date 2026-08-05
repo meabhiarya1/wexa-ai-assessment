@@ -9,6 +9,7 @@
     "build": "npm run build --workspace client",
     "start": "npm run start --workspace server",
     "seed": "npm run seed --workspace server",
+    "smoke": "npm run smoke --workspace server",
     "lint": "npm run lint --workspaces --if-present"
   },
   "workspaces": [

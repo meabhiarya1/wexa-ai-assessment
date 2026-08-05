@@ -20,6 +20,7 @@ const browserGlobals = {
 const nodeGlobals = {
   Buffer: "readonly",
   console: "readonly",
+  fetch: "readonly",
   process: "readonly"
 };
 

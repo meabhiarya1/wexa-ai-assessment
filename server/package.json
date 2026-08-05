@@ -7,6 +7,7 @@
     "dev": "node src/index.js",
     "start": "node src/index.js",
     "seed": "node scripts/seed.js",
+    "smoke": "node scripts/smoke.js",
     "lint": "eslint ."
   },
   "dependencies": {

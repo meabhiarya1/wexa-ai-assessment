@@ -1,5 +1,6 @@
 import { getCollaborators, getPersonProfile, listPeople } from "../services/peopleService.js";
 import { optionalString } from "../utils/requestParams.js";
+import { notFound } from "../utils/httpErrors.js";
 
 export async function getPeople(req, res) {
   res.json(
@@ -15,7 +16,7 @@ export async function getPerson(req, res) {
   const profile = await getPersonProfile(req.params.id);
 
   if (!profile) {
-    return res.status(404).json({ error: "Person not found" });
+    throw notFound("Person not found");
   }
 
   return res.json(profile);
