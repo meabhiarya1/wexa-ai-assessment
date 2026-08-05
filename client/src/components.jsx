@@ -224,11 +224,11 @@ export function GraphView({ graph, height = 360 }) {
         <div className="graph-hints">
           <span>
             <Move size={14} aria-hidden="true" />
-            drag nodes
+            Drag nodes
           </span>
           <span>
             <ZoomIn size={14} aria-hidden="true" />
-            scroll to zoom
+            Scroll to zoom
           </span>
         </div>
         <button onClick={zoomIn}>
