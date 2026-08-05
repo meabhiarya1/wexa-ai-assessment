@@ -1,14 +1,18 @@
 import { toPerson, toProject, toSkill, toTeam } from "../mappers/graphMapper.js";
 import { fetchCollaborators, fetchPeople, fetchPersonProfile } from "../repositories/peopleRepository.js";
 import { uniqueBy } from "../utils/collections.js";
+import { buildPagination } from "../utils/pagination.js";
 
-export async function listPeople({ search = null, teamId = null, skillId = null } = {}) {
-  const rows = await fetchPeople({ search, teamId, skillId });
+export async function listPeople({ search = null, teamId = null, skillId = null, page = 1, limit = 8, skip = 0 } = {}) {
+  const { rows, total } = await fetchPeople({ search, teamId, skillId, skip, limit });
 
-  return rows.map((row) => ({
-    ...toPerson(row.p),
-    team: row.t ? toTeam(row.t) : null
-  }));
+  return {
+    items: rows.map((row) => ({
+      ...toPerson(row.p),
+      team: row.t ? toTeam(row.t) : null
+    })),
+    pagination: buildPagination({ page, limit, total })
+  };
 }
 
 export async function getPersonProfile(id) {

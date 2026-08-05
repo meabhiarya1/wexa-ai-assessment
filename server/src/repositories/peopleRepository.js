@@ -1,7 +1,8 @@
 import { runRead } from "../db/neo4j.js";
 
-export function fetchPeople({ search = null, teamId = null, skillId = null } = {}) {
-  return runRead(
+export async function fetchPeople({ search = null, teamId = null, skillId = null, skip = 0, limit = 8 } = {}) {
+  const [rows, [countRow]] = await Promise.all([
+    runRead(
     `
     MATCH (p:Person)
     OPTIONAL MATCH (p)-[:MEMBER_OF]->(t:Team)
@@ -11,9 +12,26 @@ export function fetchPeople({ search = null, teamId = null, skillId = null } = {
       AND ($skillId IS NULL OR (p)-[:HAS_SKILL]->(:Skill {id: $skillId}))
     RETURN p, t
     ORDER BY p.name
+    SKIP $skip
+    LIMIT $limit
     `,
-    { search, teamId, skillId }
-  );
+      { search, teamId, skillId, skip, limit }
+    ),
+    runRead(
+      `
+      MATCH (p:Person)
+      OPTIONAL MATCH (p)-[:MEMBER_OF]->(t:Team)
+      WITH p, t
+      WHERE ($search IS NULL OR toLower(p.name) CONTAINS toLower($search) OR toLower(p.title) CONTAINS toLower($search))
+        AND ($teamId IS NULL OR t.id = $teamId)
+        AND ($skillId IS NULL OR (p)-[:HAS_SKILL]->(:Skill {id: $skillId}))
+      RETURN count(DISTINCT p) AS total
+      `,
+      { search, teamId, skillId }
+    )
+  ]);
+
+  return { rows, total: countRow?.total || 0 };
 }
 
 export function fetchPersonProfile(id) {

@@ -10,7 +10,10 @@ import {
   Sparkles,
   Users
 } from "lucide-react";
-import { fetchJson, toQuery } from "./api.js";
+import { toQuery } from "./api.js";
+import { AppDataProvider, useAppData } from "./context/AppDataContext.jsx";
+import { useDebouncedValue } from "./hooks/useDebouncedValue.js";
+import { useResource } from "./hooks/useResource.js";
 import {
   Badge,
   CypherInspector,
@@ -19,18 +22,22 @@ import {
   ErrorState,
   GraphView,
   LoadingBlock,
+  PaginationControls,
   PersonRow
 } from "./components.jsx";
 import { cypherSnippets } from "./cypherSnippets.js";
 import "./styles.css";
 
 const navItems = [
-  { id: "dashboard", label: "Dashboard", icon: Sparkles },
-  { id: "people", label: "People", icon: Users },
-  { id: "projects", label: "Projects", icon: BriefcaseBusiness },
-  { id: "connect", label: "Connect", icon: GitFork },
-  { id: "explore", label: "Explore", icon: Network }
+  { path: "/dashboard", label: "Dashboard", icon: Sparkles },
+  { path: "/people", label: "People", icon: Users },
+  { path: "/projects", label: "Projects", icon: BriefcaseBusiness },
+  { path: "/connect", label: "Connect", icon: GitFork },
+  { path: "/explore", label: "Explore", icon: Network }
 ];
+
+const PAGE_LIMIT = 8;
+const DIRECTORY_LIMIT = 50;
 
 function uniqueBy(items = [], getKey) {
   const list = items || [];
@@ -76,49 +83,10 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-function useResource(path, deps = []) {
-  const [state, setState] = useState({ loading: true, data: null, error: null });
-
-  useEffect(() => {
-    let active = true;
-
-    if (!path) {
-      setState({ loading: false, data: null, error: null });
-      return () => {
-        active = false;
-      };
-    }
-
-    setState({ loading: true, data: null, error: null });
-
-    fetchJson(path)
-      .then((data) => {
-        if (active) setState({ loading: false, data, error: null });
-      })
-      .catch((error) => {
-        if (active) setState({ loading: false, data: null, error });
-      });
-
-    return () => {
-      active = false;
-    };
-  }, deps);
-
-  const retry = () => {
-    if (!path) return;
-
-    setState({ loading: true, data: null, error: null });
-    fetchJson(path)
-      .then((data) => setState({ loading: false, data, error: null }))
-      .catch((error) => setState({ loading: false, data: null, error }));
-  };
-
-  return { ...state, retry };
-}
-
-function App() {
-  const [page, setPage] = useState("dashboard");
-  const health = useResource("/api/health", []);
+function AppShell() {
+  const { health } = useAppData();
+  const [route, navigate] = useBrowserRoute();
+  const ActivePage = getActivePage(route);
 
   return (
     <div className="app-shell">
@@ -134,10 +102,18 @@ function App() {
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
-              <button key={item.id} className={page === item.id ? "active" : ""} onClick={() => setPage(item.id)}>
+              <a
+                key={item.path}
+                href={item.path}
+                className={route === item.path ? "active" : ""}
+                onClick={(event) => {
+                  event.preventDefault();
+                  navigate(item.path);
+                }}
+              >
                 <Icon size={17} aria-hidden="true" />
                 {item.label}
-              </button>
+              </a>
             );
           })}
         </nav>
@@ -145,21 +121,57 @@ function App() {
 
       <main className="content">
         <DbBanner health={health.data} loading={health.loading} error={health.error} onRetry={health.retry} />
-        {page === "dashboard" && <Dashboard />}
-        {page === "people" && <People />}
-        {page === "projects" && <Projects />}
-        {page === "connect" && <Connect />}
-        {page === "explore" && <Explore />}
+        <ActivePage />
       </main>
     </div>
   );
+}
+
+function normalizeRoute(pathname) {
+  const knownRoutes = navItems.map((item) => item.path);
+  return knownRoutes.includes(pathname) ? pathname : "/dashboard";
+}
+
+function getActivePage(route) {
+  const pages = {
+    "/dashboard": Dashboard,
+    "/people": People,
+    "/projects": Projects,
+    "/connect": Connect,
+    "/explore": Explore
+  };
+
+  return pages[route] || Dashboard;
+}
+
+function useBrowserRoute() {
+  const [route, setRoute] = useState(() => normalizeRoute(window.location.pathname));
+
+  useEffect(() => {
+    if (window.location.pathname !== route) {
+      window.history.replaceState(null, "", route);
+    }
+
+    const handlePopState = () => setRoute(normalizeRoute(window.location.pathname));
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [route]);
+
+  const navigate = (path) => {
+    const nextRoute = normalizeRoute(path);
+    window.history.pushState(null, "", nextRoute);
+    setRoute(nextRoute);
+  };
+
+  return [route, navigate];
 }
 
 function Dashboard() {
   const stats = useResource("/api/stats", []);
   const bridges = useResource("/api/insights/bridges", []);
   const [search, setSearch] = useState("");
-  const searchResults = useResource(`/api/search${toQuery({ q: search })}`, [search]);
+  const debouncedSearch = useDebouncedValue(search, 350);
+  const searchResults = useResource(`/api/search${toQuery({ q: debouncedSearch })}`, [debouncedSearch]);
 
   const statCards = [
     ["People", stats.data?.people, Users],
@@ -205,9 +217,9 @@ function Dashboard() {
           <Search size={20} aria-hidden="true" />
         </div>
         <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Try React, Security, Orbit..." />
-        {search.length >= 2 && searchResults.loading && <LoadingBlock label="Searching" />}
-        {search.length >= 2 && searchResults.error && <ErrorState error={searchResults.error} />}
-        {search.length >= 2 && searchResults.data?.length === 0 && (
+        {debouncedSearch.length >= 2 && searchResults.loading && <LoadingBlock label="Searching" />}
+        {debouncedSearch.length >= 2 && searchResults.error && <ErrorState error={searchResults.error} />}
+        {debouncedSearch.length >= 2 && searchResults.data?.length === 0 && (
           <EmptyState title="No matches" description="Try a person, project, skill, or category name." />
         )}
         {searchResults.data?.length > 0 && (
@@ -252,18 +264,26 @@ function Dashboard() {
 }
 
 function People() {
-  const teams = useResource("/api/teams", []);
-  const skills = useResource("/api/skills", []);
+  const { teams, skills } = useAppData();
   const [filters, setFilters] = useState({ search: "", teamId: "", skillId: "" });
+  const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState("");
-  const people = useResource(`/api/people${toQuery(filters)}`, [filters.search, filters.teamId, filters.skillId]);
+  const debouncedSearch = useDebouncedValue(filters.search, 350);
+  const people = useResource(
+    `/api/people${toQuery({ ...filters, search: debouncedSearch, page, limit: PAGE_LIMIT })}`,
+    [debouncedSearch, filters.teamId, filters.skillId, page]
+  );
   const profile = useResource(selectedId ? `/api/people/${selectedId}` : null, [selectedId]);
   const collaborators = useResource(selectedId ? `/api/people/${selectedId}/collaborators` : null, [selectedId]);
-
+  const peopleItems = people.data?.items || [];
   const selectedProfile = selectedId ? profile.data : null;
   const profileSkills = uniqueBy(selectedProfile?.skills, (skill) => skill.id);
   const profileProjects = uniqueBy(selectedProfile?.projects, (project) => `${project.id}:${project.role}`);
   const profileCollaborators = uniqueBy(collaborators.data, (person) => person.id);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, filters.teamId, filters.skillId]);
 
   return (
     <section className="page-stack">
@@ -275,9 +295,9 @@ function People() {
           <h2>People</h2>
           {people.loading && <LoadingBlock label="Loading people" />}
           {people.error && <ErrorState error={people.error} onRetry={people.retry} />}
-          {people.data?.length === 0 && <EmptyState title="No people found" />}
+          {peopleItems.length === 0 && !people.loading && <EmptyState title="No people found" />}
           <div className="grid-list">
-            {people.data?.map((person) => (
+            {peopleItems.map((person) => (
               <PersonRow
                 key={person.id}
                 person={person}
@@ -286,6 +306,7 @@ function People() {
               />
             ))}
           </div>
+          <PaginationControls pagination={people.data?.pagination} onPageChange={setPage} />
         </section>
 
         <section className="panel sticky-panel">
@@ -330,15 +351,25 @@ function People() {
 }
 
 function Projects() {
-  const teams = useResource("/api/teams", []);
+  const { teams } = useAppData();
   const [filters, setFilters] = useState({ search: "", teamId: "", status: "" });
+  const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState("");
-  const projects = useResource(`/api/projects${toQuery(filters)}`, [filters.search, filters.teamId, filters.status]);
+  const debouncedSearch = useDebouncedValue(filters.search, 350);
+  const projects = useResource(
+    `/api/projects${toQuery({ ...filters, search: debouncedSearch, page, limit: PAGE_LIMIT })}`,
+    [debouncedSearch, filters.teamId, filters.status, page]
+  );
   const detail = useResource(selectedId ? `/api/projects/${selectedId}` : null, [selectedId]);
   const gaps = useResource(selectedId ? `/api/projects/${selectedId}/gaps` : null, [selectedId]);
+  const projectItems = projects.data?.items || [];
   const projectRequiredSkills = uniqueBy(detail.data?.requiredSkills, (skill) => skill.id);
   const projectMembers = uniqueBy(detail.data?.members, (person) => `${person.id}:${person.role}`);
   const projectGaps = uniqueBy(gaps.data, (gap) => gap.skill.id);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, filters.teamId, filters.status]);
 
   return (
     <section className="page-stack">
@@ -370,8 +401,9 @@ function Projects() {
           <h2>Projects</h2>
           {projects.loading && <LoadingBlock label="Loading projects" />}
           {projects.error && <ErrorState error={projects.error} onRetry={projects.retry} />}
+          {projectItems.length === 0 && !projects.loading && <EmptyState title="No projects found" />}
           <div className="grid-list">
-            {projects.data?.map((project) => (
+            {projectItems.map((project) => (
               <button key={project.id} className="project-button" onClick={() => setSelectedId(project.id)}>
                 <span>
                   <strong>{project.name}</strong>
@@ -381,6 +413,7 @@ function Projects() {
               </button>
             ))}
           </div>
+          <PaginationControls pagination={projects.data?.pagination} onPageChange={setPage} />
         </section>
 
         <section className="panel sticky-panel">
@@ -435,10 +468,11 @@ function Projects() {
 }
 
 function Connect() {
-  const people = useResource("/api/people", []);
+  const people = useResource(`/api/people${toQuery({ limit: DIRECTORY_LIMIT })}`, []);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const path = useResource(from && to ? `/api/path${toQuery({ from, to })}` : null, [from, to]);
+  const peopleItems = people.data?.items || [];
 
   const nodeLabels = useMemo(() => {
     const labels = new Map();
@@ -453,7 +487,7 @@ function Connect() {
       <div className="filters">
         <select value={from} onChange={(event) => setFrom(event.target.value)}>
           <option value="">From person</option>
-          {people.data?.map((person) => (
+          {peopleItems.map((person) => (
             <option key={person.id} value={person.id}>
               {person.name}
             </option>
@@ -462,8 +496,8 @@ function Connect() {
         <ArrowRight aria-hidden="true" />
         <select value={to} onChange={(event) => setTo(event.target.value)}>
           <option value="">To person</option>
-          {people.data
-            ?.filter((person) => person.id !== from)
+          {peopleItems
+            .filter((person) => person.id !== from)
             .map((person) => (
               <option key={person.id} value={person.id}>
                 {person.name}
@@ -501,7 +535,7 @@ function Connect() {
 }
 
 function Explore() {
-  const teams = useResource("/api/teams", []);
+  const { teams } = useAppData();
   const [teamId, setTeamId] = useState("");
   const graph = useResource(`/api/graph${toQuery({ teamId })}`, [teamId]);
   const graphSummary = useMemo(() => {
@@ -609,7 +643,9 @@ function Header({ eyebrow, title }) {
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <App />
+      <AppDataProvider>
+        <AppShell />
+      </AppDataProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );

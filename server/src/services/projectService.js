@@ -1,14 +1,18 @@
 import { toPerson, toProject, toSkill, toTeam } from "../mappers/graphMapper.js";
 import { fetchProjectDetail, fetchProjects, fetchProjectSkillGaps } from "../repositories/projectRepository.js";
 import { uniqueBy } from "../utils/collections.js";
+import { buildPagination } from "../utils/pagination.js";
 
-export async function listProjects({ search = null, teamId = null, status = null } = {}) {
-  const rows = await fetchProjects({ search, teamId, status });
+export async function listProjects({ search = null, teamId = null, status = null, page = 1, limit = 8, skip = 0 } = {}) {
+  const { rows, total } = await fetchProjects({ search, teamId, status, skip, limit });
 
-  return rows.map((row) => ({
-    ...toProject(row.pr),
-    team: row.t ? toTeam(row.t) : null
-  }));
+  return {
+    items: rows.map((row) => ({
+      ...toProject(row.pr),
+      team: row.t ? toTeam(row.t) : null
+    })),
+    pagination: buildPagination({ page, limit, total })
+  };
 }
 
 export async function getProjectDetail(id) {

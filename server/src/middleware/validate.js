@@ -5,6 +5,7 @@ export function validatePeopleQuery(req, _res, next) {
   validateOptionalText(req.query.search, "search", { max: 80 });
   validateOptionalId(req.query.teamId, "teamId");
   validateOptionalId(req.query.skillId, "skillId");
+  validatePagination(req.query);
   next();
 }
 
@@ -19,6 +20,7 @@ export function validateProjectsQuery(req, _res, next) {
     });
   }
 
+  validatePagination(req.query);
   next();
 }
 
@@ -92,5 +94,15 @@ function validateInteger(value, field, { min, max }) {
 
   if (parsed < min || parsed > max) {
     throw badRequest(`'${field}' must be between ${min} and ${max}.`, { field, min, max });
+  }
+}
+
+function validatePagination(query) {
+  if (query.page !== undefined) {
+    validateInteger(query.page, "page", { min: 1, max: 1000 });
+  }
+
+  if (query.limit !== undefined) {
+    validateInteger(query.limit, "limit", { min: 1, max: 50 });
   }
 }

@@ -102,7 +102,7 @@ button {
   gap: 6px;
 }
 
-.sidebar nav button {
+.sidebar nav a {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -113,10 +113,11 @@ button {
   color: #475569;
   padding: 11px 12px;
   text-align: left;
+  text-decoration: none;
 }
 
-.sidebar nav button:hover,
-.sidebar nav button.active {
+.sidebar nav a:hover,
+.sidebar nav a.active {
   background: #e8f5f5;
   color: #0f766e;
 }
@@ -438,6 +439,41 @@ button:focus-visible {
 .gap-card > div:first-child {
   display: flex;
   gap: 8px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 14px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.pagination > div {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #334155;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .mini-list span {

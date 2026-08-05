@@ -1,7 +1,8 @@
 import { runRead } from "../db/neo4j.js";
 
-export function fetchProjects({ search = null, teamId = null, status = null } = {}) {
-  return runRead(
+export async function fetchProjects({ search = null, teamId = null, status = null, skip = 0, limit = 8 } = {}) {
+  const [rows, [countRow]] = await Promise.all([
+    runRead(
     `
     MATCH (pr:Project)
     OPTIONAL MATCH (pr)-[:OWNED_BY]->(t:Team)
@@ -11,9 +12,26 @@ export function fetchProjects({ search = null, teamId = null, status = null } = 
       AND ($status IS NULL OR pr.status = $status)
     RETURN pr, t
     ORDER BY pr.name
+    SKIP $skip
+    LIMIT $limit
     `,
-    { search, teamId, status }
-  );
+      { search, teamId, status, skip, limit }
+    ),
+    runRead(
+      `
+      MATCH (pr:Project)
+      OPTIONAL MATCH (pr)-[:OWNED_BY]->(t:Team)
+      WITH pr, t
+      WHERE ($search IS NULL OR toLower(pr.name) CONTAINS toLower($search))
+        AND ($teamId IS NULL OR t.id = $teamId)
+        AND ($status IS NULL OR pr.status = $status)
+      RETURN count(DISTINCT pr) AS total
+      `,
+      { search, teamId, status }
+    )
+  ]);
+
+  return { rows, total: countRow?.total || 0 };
 }
 
 export function fetchProjectDetail(id) {

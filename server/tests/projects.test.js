@@ -16,11 +16,23 @@ test.after(async () => {
 test("projects list supports happy path and valid filters", async () => {
   const list = await api.get("/api/projects");
   assertApiSuccess(list.response, list.payload);
-  assert.equal(list.data.length, 8);
+  assert.equal(list.data.items.length, 8);
+  assert.equal(list.data.pagination.total, 8);
+  assert.equal(list.data.pagination.totalPages, 1);
 
   const filtered = await api.get("/api/projects?teamId=team-platform&status=active");
   assertApiSuccess(filtered.response, filtered.payload);
-  assert.ok(Array.isArray(filtered.data));
+  assert.ok(Array.isArray(filtered.data.items));
+});
+
+test("projects list supports pagination", async () => {
+  const result = await api.get("/api/projects?page=2&limit=3");
+
+  assertApiSuccess(result.response, result.payload);
+  assert.equal(result.data.items.length, 3);
+  assert.equal(result.data.pagination.page, 2);
+  assert.equal(result.data.pagination.limit, 3);
+  assert.equal(result.data.pagination.hasPreviousPage, true);
 });
 
 test("project detail returns required skills and members", async () => {
@@ -45,6 +57,9 @@ test("project endpoints reject invalid params and query values", async () => {
 
   const invalidId = await api.get("/api/projects/atlas");
   assertApiError(invalidId.response, invalidId.payload, 400, "BAD_REQUEST");
+
+  const invalidLimit = await api.get("/api/projects?limit=0");
+  assertApiError(invalidLimit.response, invalidLimit.payload, 400, "BAD_REQUEST");
 });
 
 test("missing project returns a structured not found error", async () => {

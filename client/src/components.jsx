@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ForceGraph2D from "react-force-graph-2d";
-import { AlertTriangle, Code2, Database, Loader2, Maximize2, Move, Network, ZoomIn } from "lucide-react";
+import { AlertTriangle, ChevronLeft, ChevronRight, Code2, Database, Loader2, Maximize2, Move, Network, ZoomIn } from "lucide-react";
 
 const nodeColors = {
   Person: "#2563eb",
@@ -106,6 +106,28 @@ export function PersonRow({ person, right, onClick }) {
       </span>
       {right && <span className="row-right">{right}</span>}
     </button>
+  );
+}
+
+export function PaginationControls({ pagination, onPageChange }) {
+  if (!pagination || pagination.totalPages <= 1) return null;
+
+  return (
+    <div className="pagination">
+      <span>
+        Page {pagination.page} of {pagination.totalPages} · {pagination.total} total
+      </span>
+      <div>
+        <button disabled={!pagination.hasPreviousPage} onClick={() => onPageChange(pagination.page - 1)}>
+          <ChevronLeft size={15} aria-hidden="true" />
+          Previous
+        </button>
+        <button disabled={!pagination.hasNextPage} onClick={() => onPageChange(pagination.page + 1)}>
+          Next
+          <ChevronRight size={15} aria-hidden="true" />
+        </button>
+      </div>
+    </div>
   );
 }
 

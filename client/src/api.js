@@ -1,25 +1,9 @@
-export class ApiError extends Error {
-  constructor(message, status, details = {}) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.details = details;
-  }
-}
+import { ApiError, apiClient } from "./lib/apiClient.js";
 
-export async function fetchJson(path) {
-  const response = await fetch(path);
-  const payload = await response.json().catch(() => ({}));
+export { ApiError };
 
-  if (!response.ok) {
-    throw new ApiError(payload.message || payload.error || "Request failed.", response.status, payload);
-  }
-
-  if (payload && payload.success === true && Object.hasOwn(payload, "data")) {
-    return payload.data;
-  }
-
-  return payload;
+export async function fetchJson(path, options = {}) {
+  return apiClient.get(path, options);
 }
 
 export function toQuery(params) {

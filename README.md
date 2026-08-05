@@ -66,6 +66,7 @@ graph LR
 - Express JavaScript API.
 - CognoDB Cloud as the graph database.
 - Official `neo4j-driver` JavaScript package over `bolt+s://`.
+- Axios client instance for frontend API calls.
 - Tailwind CSS and custom CSS for the UI.
 
 ## Setup
@@ -93,9 +94,12 @@ COGNODB_USERNAME=cognodb
 COGNODB_PASSWORD=your-generated-password
 PORT=8080
 CLIENT_ORIGIN=http://localhost:5173
+VITE_API_BASE_URL=
 ```
 
 Never commit real credentials. `.env` is ignored by Git.
+
+`VITE_API_BASE_URL` can stay empty locally because Vite proxies `/api` to the Express server. On Netlify, set it to the deployed Render API URL.
 
 ### 3. Install Dependencies
 
@@ -169,6 +173,10 @@ npm test
 - Person profile with skills, projects, mentors, mentees, and collaborators.
 - Project directory with project detail and skill-gap analysis.
 - Candidate recommendations with skill level, years, and fit score.
+- Server-side pagination for people and projects.
+- Debounced search inputs to avoid unnecessary API calls.
+- Browser-history route navigation for dashboard, people, projects, connect, and explore views.
+- Shared frontend app-data context for health, teams, and skills.
 - Shortest path between two people.
 - Draggable, zoomable organization graph explorer.
 - Cypher inspector panels for the most important graph queries.
@@ -222,10 +230,15 @@ ORDER BY bridgeStrength DESC
 
 ```text
 client/
+  public/
+    _redirects
   src/
     api.js
     components.jsx
+    context/
     cypherSnippets.js
+    hooks/
+    lib/
     main.jsx
     styles.css
 server/
@@ -298,6 +311,7 @@ Screenshots are stored under `docs/screenshots/`.
 - [x] Graph domain model constants instead of fake ORM models.
 - [x] Versioned CognoDB migration runner for constraints and indexes.
 - [x] Parameterized Cypher repository queries.
+- [x] Frontend Axios instance, debounced API calls, route navigation, shared context, and paginated directories.
 - [x] Production-style API hardening with request IDs, rate limiting, validation, caching, structured errors, health/readiness endpoints, and graceful shutdown.
 - [x] Automated API smoke test.
 - [x] API integration tests covering happy paths, validation errors, missing resources, unsupported methods, malformed JSON, caching, and rate limiting.
